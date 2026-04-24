@@ -33,52 +33,51 @@
     ];
 
     // COLOQUE AQUI A URL DO SERVIÇO QUE VAI SALVAR OS DADOS (Veja as alternativas abaixo)
-    const urlSalvamento = "SUA_URL_DE_SALVAMENTO_AQUI"; 
+    const urlSalvamento = "https://script.google.com/macros/s/AKfycbwlU-NQv9i0-nrxu-GDGe_axKKnH79XUSv6gZ5EEaqZ6jW_4ZocbrR9k6oNcaIa6T6s/exec"; 
 
-    document.getElementById('formAcesso').addEventListener('submit', async function(event) {
-        event.preventDefault(); // Impede o recarregamento da página
+    document.getElementById('formRedirecionamento').addEventListener('submit', async function(e) {
+        e.preventDefault();
         
         const matricula = document.getElementById('matricula').value;
-        const btnSubmit = document.querySelector('button');
-        const mensagem = document.getElementById('mensagem');
+        const btn = document.getElementById('btnAcessar');
+        const status = document.getElementById('status');
         
-        // Desabilita o botão e mostra mensagem
-        btnSubmit.disabled = true;
-        mensagem.style.display = "block";
+        btn.disabled = true;
+        status.style.display = "block";
 
-        let ipAluno = "Desconhecido";
+        // Sorteia o destino primeiro para registrar
+        const destinoSorteado = SITES[Math.floor(Math.random() * SITES.length)];
 
-        // 1. BUSCAR O IP DO ALUNO (Usando a API gratuita ipify)
+        // Tenta buscar o IP (usando uma API que não bloqueia CORS)
+        let ip = "Não capturado";
         try {
-            const respostaIp = await fetch('https://api.ipify.org?format=json');
-            const dadosIp = await respostaIp.json();
-            ipAluno = dadosIp.ip;
-        } catch (erro) {
-            console.error("Não foi possível obter o IP", erro);
-        }
+            const resIp = await fetch('https://api.ipify.org?format=json');
+            const dataIp = await resIp.json();
+            ip = dataIp.ip;
+        } catch (err) { console.log("Erro IP:", err); }
 
-        // 2. ENVIAR OS DADOS PARA O SERVIÇO EXTERNO
-        // O código tenta enviar, mas redireciona o aluno mesmo se der erro no salvamento
+        // Envia os dados para o Google Sheets
         try {
-            await fetch(urlSalvamento, {
+            // Usamos mode: 'no-cors' para evitar problemas de política de segurança do Google
+            // mas isso impede de ler a resposta (o que não importa, pois vamos redirecionar)
+            await fetch(WEB_APP_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
+                mode: 'no-cors', 
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     matricula: matricula,
-                    ip: ipAluno,
-                    data_hora: new Date().toISOString()
+                    ip: ip,
+                    destino: destinoSorteado
                 })
             });
-        } catch (erro) {
-            console.error("Erro ao salvar os dados", erro);
+        } catch (err) {
+            console.log("Erro ao salvar:", err);
         }
 
-        // 3. REDIRECIONAMENTO ALEATÓRIO
-        const siteSorteado = sites[Math.floor(Math.random() * sites.length)];
-        window.location.href = siteSorteado;
+        // Pequeno delay para garantir o envio e redireciona
+        setTimeout(() => {
+            window.location.href = destinoSorteado;
+        }, 500);
     });
 </script>
 
