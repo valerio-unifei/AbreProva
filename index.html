@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso a prova</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f9; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 100%; }
+        input[type="text"] { width: 90%; padding: 10px; margin: 15px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        button { background-color: #4CAF50; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
+        button:hover { background-color: #45a049; }
+        #mensagem { margin-top: 15px; color: #666; font-size: 14px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Acesso do Aluno</h2>
+    <p>Digite sua matrícula para continuar:</p>
+    <form id="formAcesso">
+        <input type="text" id="matricula" placeholder="Ex: 2026012345" required>
+        <button type="submit">Acessar</button>
+    </form>
+    <p id="mensagem">Aguarde, redirecionando...</p>
+</div>
+
+<script>
+    // LISTA DOS DOIS SITES PARA REDIRECIONAMENTO
+    const sites = [
+        "https://docs.google.com/forms/d/e/1FAIpQLSfr6BRtd3fVMfuS-7VdBRZRJg0PQZUSHtXGPKfSk44qr88Dbw/viewform?usp=header",
+        "https://docs.google.com/forms/d/e/1FAIpQLSe_e3zQ1srxPV3RXB16mTriK9WkzMSSISxWJJRoeje3ZQx87A/viewform?usp=header"
+    ];
+
+    // COLOQUE AQUI A URL DO SERVIÇO QUE VAI SALVAR OS DADOS (Veja as alternativas abaixo)
+    const urlSalvamento = "SUA_URL_DE_SALVAMENTO_AQUI"; 
+
+    document.getElementById('formAcesso').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Impede o recarregamento da página
+        
+        const matricula = document.getElementById('matricula').value;
+        const btnSubmit = document.querySelector('button');
+        const mensagem = document.getElementById('mensagem');
+        
+        // Desabilita o botão e mostra mensagem
+        btnSubmit.disabled = true;
+        mensagem.style.display = "block";
+
+        let ipAluno = "Desconhecido";
+
+        // 1. BUSCAR O IP DO ALUNO (Usando a API gratuita ipify)
+        try {
+            const respostaIp = await fetch('https://api.ipify.org?format=json');
+            const dadosIp = await respostaIp.json();
+            ipAluno = dadosIp.ip;
+        } catch (erro) {
+            console.error("Não foi possível obter o IP", erro);
+        }
+
+        // 2. ENVIAR OS DADOS PARA O SERVIÇO EXTERNO
+        // O código tenta enviar, mas redireciona o aluno mesmo se der erro no salvamento
+        try {
+            await fetch(urlSalvamento, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    matricula: matricula,
+                    ip: ipAluno,
+                    data_hora: new Date().toISOString()
+                })
+            });
+        } catch (erro) {
+            console.error("Erro ao salvar os dados", erro);
+        }
+
+        // 3. REDIRECIONAMENTO ALEATÓRIO
+        const siteSorteado = sites[Math.floor(Math.random() * sites.length)];
+        window.location.href = siteSorteado;
+    });
+</script>
+
+</body>
+</html>
