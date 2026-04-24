@@ -3,82 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acesso a prova</title>
+    <title>Prova</title>
     <style>
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f9; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 100%; }
-        input[type="text"] { width: 90%; padding: 10px; margin: 15px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
-        button { background-color: #4CAF50; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
-        button:hover { background-color: #45a049; }
-        #mensagem { margin-top: 15px; color: #666; font-size: 14px; display: none; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; margin: 0; }
+        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); text-align: center; max-width: 350px; width: 100%; }
+        h2 { color: #1c1e21; margin-bottom: 20px; }
+        input[type="text"] { width: 100%; padding: 12px; margin: 20px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { background-color: #007bff; color: white; padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
+        button:disabled { background-color: #ccc; }
+        #status { margin-top: 20px; color: #555; font-size: 14px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Acesso do Aluno</h2>
-    <p>Digite sua matrícula para continuar:</p>
-    <form id="formAcesso">
-        <input type="text" id="matricula" placeholder="Ex: 2026012345" required>
-        <button type="submit">Acessar</button>
+    <h2>Acesso Aluno</h2>
+    <form id="formRedirecionamento">
+        <input type="text" id="matricula" placeholder="Digite sua matrícula" required>
+        <button type="submit" id="btnAcessar">Acessar Sistema</button>
     </form>
-    <p id="mensagem">Aguarde, redirecionando...</p>
+    <p id="status">Processando acesso...</p>
 </div>
 
 <script>
-    // LISTA DOS DOIS SITES PARA REDIRECIONAMENTO
-    const sites = [
-        "https://docs.google.com/forms/d/e/1FAIpQLSfr6BRtd3fVMfuS-7VdBRZRJg0PQZUSHtXGPKfSk44qr88Dbw/viewform?usp=header",
-        "https://docs.google.com/forms/d/e/1FAIpQLSe_e3zQ1srxPV3RXB16mTriK9WkzMSSISxWJJRoeje3ZQx87A/viewform?usp=header"
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwlU-NQv9i0-nrxu-GDGe_axKKnH79XUSv6gZ5EEaqZ6jW_4ZocbrR9k6oNcaIa6T6s/exec";
+    const SITES = [
+        "https://docs.google.com/forms/d/e/1FAIpQLSeQFeCX7ksTLM1HdMfGxiPtTdotiaOY4_KICj6RuSXuNbfGXw/viewform?usp=header",
+        "https://docs.google.com/forms/d/e/1FAIpQLSf65qAmJIBB-ML5q5ywMvU6Dui0bPV2Q93Qhha1yOQEGKeoZA/viewform?usp=header",
     ];
 
-    // COLOQUE AQUI A URL DO SERVIÇO QUE VAI SALVAR OS DADOS (Veja as alternativas abaixo)
-    const urlSalvamento = "SUA_URL_DE_SALVAMENTO_AQUI"; 
-
-    document.getElementById('formAcesso').addEventListener('submit', async function(event) {
-        event.preventDefault(); // Impede o recarregamento da página
+    document.getElementById('formRedirecionamento').addEventListener('submit', async function(e) {
+        e.preventDefault();
         
         const matricula = document.getElementById('matricula').value;
-        const btnSubmit = document.querySelector('button');
-        const mensagem = document.getElementById('mensagem');
+        const btn = document.getElementById('btnAcessar');
+        const status = document.getElementById('status');
         
-        // Desabilita o botão e mostra mensagem
-        btnSubmit.disabled = true;
-        mensagem.style.display = "block";
+        btn.disabled = true;
+        status.style.display = "block";
 
-        let ipAluno = "Desconhecido";
+        const destinoSorteado = SITES[Math.floor(Math.random() * SITES.length)];
 
-        // 1. BUSCAR O IP DO ALUNO (Usando a API gratuita ipify)
+        let ip = "Não capturado";
         try {
-            const respostaIp = await fetch('https://api.ipify.org?format=json');
-            const dadosIp = await respostaIp.json();
-            ipAluno = dadosIp.ip;
-        } catch (erro) {
-            console.error("Não foi possível obter o IP", erro);
-        }
+            const resIp = await fetch('https://api.ipify.org?format=json');
+            const dataIp = await resIp.json();
+            ip = dataIp.ip;
+        } catch (err) { console.log("Erro IP:", err); }
 
-        // 2. ENVIAR OS DADOS PARA O SERVIÇO EXTERNO
-        // O código tenta enviar, mas redireciona o aluno mesmo se der erro no salvamento
+        // Envia como form-urlencoded (compatível com no-cors)
+        const params = new URLSearchParams();
+        params.append('matricula', matricula);
+        params.append('ip', ip);
+        params.append('destino', destinoSorteado);
+
         try {
-            await fetch(urlSalvamento, {
+            await fetch(WEB_APP_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                mode: 'no-cors',
+                headers: { 
+                    'Content-Type': 'application/x-www-form-urlencoded' 
                 },
-                body: JSON.stringify({
-                    matricula: matricula,
-                    ip: ipAluno,
-                    data_hora: new Date().toISOString()
-                })
+                body: params.toString()
             });
-        } catch (erro) {
-            console.error("Erro ao salvar os dados", erro);
+        } catch (err) {
+            console.log("Erro ao salvar:", err);
         }
 
-        // 3. REDIRECIONAMENTO ALEATÓRIO
-        const siteSorteado = sites[Math.floor(Math.random() * sites.length)];
-        window.location.href = siteSorteado;
+        setTimeout(() => {
+            window.location.href = destinoSorteado;
+        }, 500);
     });
 </script>
 
