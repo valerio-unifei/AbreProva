@@ -45,18 +45,19 @@
 
         const destinoSorteado = SITES[Math.floor(Math.random() * SITES.length)];
 
-        let ip = "Não capturado";
+        let ipn = "Não capturado";
         try {
             const resIp = await fetch('https://api.ipify.org?format=json');
             const dataIp = await resIp.json();
-            ip = dataIp.ip;
+            ipn = dataIp.ip;
         } catch (err) { console.log("Erro IP:", err); }
 
         // Envia como form-urlencoded (compatível com no-cors)
-        const params = new URLSearchParams();
-        params.append('matricula', matricula);
-        params.append('ip', ip);
-        params.append('destino', destinoSorteado);
+        const payload = {
+            matricula: matricula,
+            ip: ipn,
+            destino: destinoSorteado
+        };
 
         try {
             await fetch(WEB_APP_URL, {
@@ -64,7 +65,7 @@
                 headers: { 
                     'Content-Type': 'text/plain;charset=utf-8' 
                 },
-                body: params.toString()
+                body: JSON.stringify(payload)
             });
         } catch (err) {
             console.log("Erro ao salvar:", err);
