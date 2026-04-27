@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prova</title>
+    <title>ECOP11A</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; margin: 0; }
         .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); text-align: center; max-width: 350px; width: 100%; }
@@ -17,10 +17,10 @@
 <body>
 
 <div class="container">
-    <h2>Acesso Aluno</h2>
+    <h2>Acesso Aluno a Prova</h2>
     <form id="formRedirecionamento">
         <input type="text" id="matricula" placeholder="Digite sua matrícula" required>
-        <button type="submit" id="btnAcessar">Acessar Sistema</button>
+        <button type="submit" id="btnAcessar">Acessar Prova</button>
     </form>
     <p id="status">Processando acesso...</p>
 </div>
@@ -29,8 +29,8 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwlU-NQv9i0-nrxu-GDGe_axKKnH79XUSv6gZ5EEaqZ6jW_4ZocbrR9k6oNcaIa6T6s/exec";
     
     const SITES = [
-        "https://docs.google.com/forms/d/e/1FAIpQLSeQFeCX7ksTLM1HdMfGxiPtTdotiaOY4_KICj6RuSXuNbfGXw/viewform?usp=header",
-        "https://docs.google.com/forms/d/e/1FAIpQLSf65qAmJIBB-ML5q5ywMvU6Dui0bPV2Q93Qhha1yOQEGKeoZA/viewform?usp=header",
+        "https://docs.google.com/forms/d/e/1FAIpQLSeyhgRcPAC_WfH22xejfxZ9OX60gp3otTFc5YQdvKOCslAP4Q/viewform?usp=header",
+        "https://docs.google.com/forms/d/e/1FAIpQLSf5ueJzmREHRKDhwxMgPfI1ktuQ3krqJ8w0qAaHdR8jip1BKA/viewform?usp=header",
     ];
 
     document.getElementById('formRedirecionamento').addEventListener('submit', async function(e) {
