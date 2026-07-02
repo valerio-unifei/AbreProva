@@ -1,81 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ECOP11A</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; margin: 0; }
-        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); text-align: center; max-width: 350px; width: 100%; }
-        h2 { color: #1c1e21; margin-bottom: 20px; }
-        input[type="text"] { width: 100%; padding: 12px; margin: 20px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { background-color: #007bff; color: white; padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
-        button:disabled { background-color: #ccc; }
-        #status { margin-top: 20px; color: #555; font-size: 14px; display: none; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h2>Acesso Aluno a Prova</h2>
-    <form id="formRedirecionamento">
-        <input type="text" id="matricula" placeholder="Digite sua matrícula" required>
-        <button type="submit" id="btnAcessar">Acessar Prova</button>
-    </form>
-    <p id="status">Processando acesso...</p>
-</div>
-
-<script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwlU-NQv9i0-nrxu-GDGe_axKKnH79XUSv6gZ5EEaqZ6jW_4ZocbrR9k6oNcaIa6T6s/exec";
-    
-    const SITES = [
-        "https://docs.google.com/forms/d/e/1FAIpQLSc-FdBmRVS0jjHpRZJl18QP8FfDlxRfkGo5css7oGlIHKZA6w/viewform?usp=header",
-        "https://docs.google.com/forms/d/e/1FAIpQLSe64pvrT6eK2bnSJb8M9LDRkw4JdZiQPh3-aCvZ6C4MysDrJw/viewform?usp=header",
-    ];
-
-    document.getElementById('formRedirecionamento').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const matricula = document.getElementById('matricula').value;
-        const btn = document.getElementById('btnAcessar');
-        const status = document.getElementById('status');
-        
-        btn.disabled = true;
-        status.style.display = "block";
-
-        const destinoSorteado = SITES[Math.floor(Math.random() * SITES.length)];
-
-        let ipn = "Não capturado";
-        try {
-            const resIp = await fetch('https://api.ipify.org?format=json');
-            const dataIp = await resIp.json();
-            ipn = dataIp.ip;
-        } catch (err) { console.log("Erro IP:", err); }
-
-        // Envia como form-urlencoded (compatível com no-cors)
-        const payload = {
-            matricula: matricula,
-            ip: ipn,
-            destino: destinoSorteado
-        };
-
-        try {
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'text/plain;charset=utf-8' 
-                },
-                body: JSON.stringify(payload)
-            });
-        } catch (err) {
-            console.log("Erro ao salvar:", err);
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
         }
 
-        setTimeout(() => {
-            window.location.href = destinoSorteado;
-        }, 500);
-    });
-</script>
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 350px;
+            width: 100%;
+        }
+
+        h2 {
+            color: #1c1e21;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+        }
+
+        #status {
+            margin-top: 20px;
+            color: #555;
+            font-size: 14px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Acesso Aluno a Prova</h2>
+        <form id="formRedirecionamento">
+            <input type="text" id="matricula" placeholder="Digite sua matrícula" required>
+            <button type="submit" id="btnAcessar">Acessar Prova</button>
+        </form>
+        <p id="status">Processando acesso...</p>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwlU-NQv9i0-nrxu-GDGe_axKKnH79XUSv6gZ5EEaqZ6jW_4ZocbrR9k6oNcaIa6T6s/exec";
+
+        const SITES = [
+            "https://docs.google.com/forms/d/e/1FAIpQLSfzPGP95VHuOFsXqG3p4zKNfMek5LRzv2OyzqaG5kXjo5-gng/viewform?usp=header",
+            "https://docs.google.com/forms/d/e/1FAIpQLSfBfNjDQCWLi65OnzTqPMqtuMJ-Q3H2IdTclPgTxq_apbzFHQ/viewform?usp=header",
+        ];
+
+        // Função para gerar um número pseudo-aleatório [0, 1) baseado em uma semente (string)
+        function seededRandom(seedStr) {
+            let hash = 0;
+            for (let i = 0; i < seedStr.length; i++) {
+                hash = (hash << 5) - hash + seedStr.charCodeAt(i);
+                hash |= 0; // Converte para inteiro de 32 bits
+            }
+            // Algoritmo LCG (Linear Congruential Generator) para obter o valor pseudo-aleatório
+            let seed = Math.abs(hash);
+            seed = (seed * 1664525 + 1013904223) % 4294967296;
+            return seed / 4294967296;
+        }
+
+        // Função para gerar uma identificação única (fingerprint) do computador
+        function getDeviceFingerprint() {
+            let deviceId = localStorage.getItem('device_id');
+            if (!deviceId) {
+                deviceId = 'DEV-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+                localStorage.setItem('device_id', deviceId);
+            }
+
+            let os = "Outro";
+            const ua = navigator.userAgent;
+            if (ua.indexOf("Win") !== -1) os = "Windows";
+            else if (ua.indexOf("Mac") !== -1) os = "macOS";
+            else if (ua.indexOf("Linux") !== -1) os = "Linux";
+            else if (ua.indexOf("Android") !== -1) os = "Android";
+            else if (ua.indexOf("like Mac") !== -1) os = "iOS";
+
+            const screenRes = `${screen.width}x${screen.height}`;
+            const cores = navigator.hardwareConcurrency || "N/A";
+            const ram = navigator.deviceMemory ? `${navigator.deviceMemory}GB` : "N/A";
+
+            return `${deviceId} (${os}; ${screenRes}; CPU:${cores}; RAM:${ram})`;
+        }
+
+        document.getElementById('formRedirecionamento').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const matricula = document.getElementById('matricula').value;
+            const btn = document.getElementById('btnAcessar');
+            const status = document.getElementById('status');
+
+            btn.disabled = true;
+            status.style.display = "block";
+
+            const cleanMatricula = matricula.trim();
+            const rngValue = seededRandom(cleanMatricula);
+            const destinoSorteado = SITES[Math.floor(rngValue * SITES.length)];
+
+            // Obtém a identificação única local do computador (não depende de APIs externas de rede)
+            const deviceIdentifier = getDeviceFingerprint();
+
+            // Envia como form-urlencoded (compatível com no-cors)
+            const payload = {
+                matricula: matricula,
+                ip: deviceIdentifier,
+                destino: destinoSorteado
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.log("Erro ao salvar:", err);
+            }
+
+            setTimeout(() => {
+                window.location.href = destinoSorteado;
+            }, 500);
+        });
+    </script>
 
 </body>
+
 </html>
